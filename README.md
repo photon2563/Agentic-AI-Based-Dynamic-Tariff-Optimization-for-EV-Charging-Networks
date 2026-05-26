@@ -1,281 +1,139 @@
-An end-to-end intelligent system for forecasting EV charging demand, optimizing tariffs dynamically, and monitoring network performance using spatio-temporal data, graph structure, and agent-based decision logic.
+# EV Charging Demand Forecasting & Dynamic Tariff Optimization
 
-Overview
+![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)
+![Jupyter](https://img.shields.io/badge/jupyter-%23FA0F00.svg?style=flat&logo=jupyter&logoColor=white)
+![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Agentic%20AI-orange)
+![Pandas](https://img.shields.io/badge/pandas-Data_Engineering-150458?logo=pandas)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-Electric vehicle charging infrastructure is often priced using static tariffs that ignore real-time demand, spatial congestion, and station-level operational variation. This project addresses that limitation by building an agentic AI framework for EV charging networks that can:
+## Comprehensive Overview
 
-predict future demand and congestion,
-identify overloaded and underutilized stations,
-optimize pricing dynamically based on network conditions,
-monitor operational outcomes,
-and continuously refine tariff decisions through feedback.
+Electric vehicle (EV) charging infrastructure currently suffers from a critical inefficiency: **static pricing**. Fixed tariffs ignore real-time network demand, spatial congestion, and station-level operational variations, leading to overloaded stations during peak hours and underutilized stations during off-peak windows. 
 
-The project is designed as a full pipeline rather than a single model. It combines data engineering, exploratory analysis, forecasting, network intelligence, tariff optimization, and evaluation into one coherent system. The brief explicitly frames the system around demand prediction, optimal tariffing, and a monitoring/learning loop that improves revenue, utilization, and wait times.
+This project solves this limitation by introducing an **Agentic AI Framework for EV Charging Networks**. Designed as an end-to-end operational pipeline, this system does not just forecast demand—it actively simulates business decisions to optimize network health. 
 
-Why this project matters
+**Core Capabilities:**
+1. **Predictive Intelligence:** Forecast future demand, occupancy rates, and congestion risk.
+2. **Network Monitoring:** Identify which stations are structurally overloaded or underutilized using spatial graph structures.
+3. **Dynamic Tariffing:** Automatically generate optimized pricing actions based on live and predicted network conditions.
+4. **Feedback Loop:** Continuously evaluate operational outcomes (revenue, wait times, utilization) to refine future decisions.
 
-EV charging networks are not static systems. Demand varies by:
+---
 
-time of day,
-day of week,
-location,
-charger type,
-local congestion,
-neighboring station usage,
-and pricing conditions.
+## Project Preview & Visuals
 
-A fixed tariff cannot respond to this variation. This project builds a dynamic decision engine that uses historical and real-time patterns to recommend better charging prices, reduce congestion, and improve overall charging efficiency. The objective is not only predictive accuracy, but also operational improvement and business value.
+*(Note: Replace the placeholder image links with actual paths to your charts/screenshots located in the `figures/` folder)*
 
-Key objectives
+### 1. Demand Prediction vs. Actuals
+> High-accuracy forecasting across 24-hour cycles.
+> ![Demand Forecast Preview](figures/forecast_preview_placeholder.png)
 
-This project is built to answer the following questions:
+### 2. Dynamic Tariff Simulation 
+> Demonstrating how localized surge pricing redistributes demand and reduces peak congestion.
+> ![Tariff Simulation Preview](figures/tariff_impact_placeholder.png)
 
-How does charging demand evolve over time?
-Which stations are overused or underused?
-How do nearby stations influence each other?
-What tariff should be used under different congestion regimes?
-Can dynamic pricing increase revenue without harming utilization?
-Can an agent-based system learn from outcomes and improve future decisions?
+### 3. Spatial Network Graph (UrbanEV)
+> Mapping the proximity and influence of neighboring charging stations.
+> ![Network Graph Preview](figures/network_graph_placeholder.png)
 
-The brief asks for demand forecasting, dynamic tariff optimization, charger utilization analysis, congestion reduction, and autonomous pricing intelligence with a feedback loop.
+---
 
-Datasets used
+## Datasets & Data Engineering
 
-The project uses two official datasets:
+This system processes two highly granular, official EV datasets:
 
-1) ACN-Data (Adaptive Charging Network)
+* **ACN-Data (Adaptive Charging Network):** * **Scope:** >30,000 charging sessions from Caltech/JPL sites.
+    * **Granularity:** Session-level (timestamps, energy delivered, session duration, station IDs, user behavior).
+* **UrbanEV / ST-EVCDP:** * **Scope:** Large-scale urban network featuring 24,798 charging piles.
+    * **Granularity:** 5-minute interval data. Crucial for extracting temporal demand variation, spatial charging behavior, and peak-hour localized congestion.
 
-A session-level dataset with EV charging sessions, timestamps, energy delivered, session duration, station IDs, and user behavior. It is provided in JSON format and can be converted into tabular form for analysis. The brief notes that it contains more than 30,000 charging sessions from Caltech/JPL sites.
+### The Data Pipeline
+The **Data Layer** unifies these disparate formats into a single, master `station-time` tabular dataset. This involves timestamp alignment, missing value imputation, and merging spatial coordinates to build a graph representation of the physical network.
 
-2) UrbanEV / ST-EVCDP
+---
 
-A large-scale urban charging dataset with 24,798 charging piles and 5-minute interval data. It is useful for analyzing temporal demand variation, spatial charging behavior, and peak-hour congestion. The brief identifies this dataset as the main source for urban station-level demand patterns.
+## Multi-Agent Architecture
 
-Project architecture
+Unlike standard regression models, this project utilizes a multi-agent framework to simulate autonomous decision-making:
 
-The system is organized into five major layers:
+1.  ** Demand Prediction Agent:** The predictive core. It ingests historical and engineered features to predict exact charging demand, station occupancy, and the probability of severe congestion at specific hours.
+2.  ** Dynamic Tariff Agent:** The economic engine. It applies logic-based rules (and uncertainty thresholds) to the Demand Agent's predictions to recommend pricing changes—such as applying surcharges during overloads or discounts during off-peak windows.
+3.  ** Monitoring Agent:** The evaluator. It measures the simulated effect of tariff changes on revenue, charger utilization, proxy wait times, and overall pricing efficiency.
+4.  ** Coordinator Agent:** The orchestrator. It merges outputs from all sub-agents into a unified operational dashboard for stakeholders.
 
-1. Data Layer
+---
 
-Loads and aligns all source files into a unified station-time dataset.
+## Feature Engineering Dictionary
 
-2. Feature Engineering Layer
+To achieve high predictive performance, the system constructs a rich spatio-temporal feature space:
 
-Creates temporal, lag, rolling, congestion, economic, and graph-based features.
+| Feature Category | Engineered Variables | Purpose |
+| :--- | :--- | :--- |
+| **Temporal Signals** | Hour, weekday/weekend flags, month, cyclic time encoding (sin/cos). | Captures daily human routines and seasonal EV charging habits. |
+| **Lag & Rolling** | Previous step demand/occupancy, rolling 24h means, rolling standard deviations. | Provides the model with short-term historical context and momentum. |
+| **Spatial & Graph** | Nearest neighbor distance, average distance to top 3 neighbors, distance-weighted neighbor pressure. | Understands geographic density and if nearby stations can absorb overflow. |
+| **Network Centrality** | Degree centrality, betweenness centrality, clustering coefficient, community ID. | Identifies "critical hub" stations vs. isolated edge stations. |
+| **Economic/Congestion** | Congestion index, demand pressure, estimated baseline revenue. | Translates physical charging limits into actionable business metrics. |
 
-3. Forecasting Layer
+---
+## Modeling & Forecasting Engine
 
-Predicts future charging demand, occupancy, and congestion risk.
+The forecasting layer relies on a time-aware, tabular prediction system. We move beyond simple time-series (like ARIMA) to robust tree-based models capable of handling high-dimensional, non-linear relationships.
 
-4. Dynamic Tariff Layer
+* **Baseline Models:** Random Forest, XGBoost, LightGBM.
+* **Advanced Techniques:** * **Ensemble Forecasting:** Combining base model predictions to reduce variance.
+    * **Uncertainty Estimation:** Quantifying prediction confidence to prevent the Tariff Agent from making aggressive price changes based on low-confidence forecasts.
 
-Uses predictions to determine station-wise pricing actions.
+---
 
-5. Monitoring and Learning Layer
+## Evaluation & Business Metrics
 
-Evaluates outcomes and feeds performance back into the system.
+The system's success is evaluated across two distinct paradigms:
 
-This architecture matches the brief’s emphasis on a self-improving agentic framework rather than a standalone regression model.
+**1. Predictive Performance (How accurate is the AI?)**
+* **MAE & RMSE:** Absolute and squared error of energy demand.
+* **R²:** Variance explained by the model.
+* **MAPE:** Percentage error for scale-independent evaluation.
 
-What the system does
+**2. Operational Performance (How much value does it create?)**
+* **Revenue Gain (%):** Simulated uplift in gross revenue against a static-price baseline.
+* **Charger Utilization Rate:** Ensuring price hikes do not crash overall usage.
+* **Off-Peak Uplift:** Measuring successful demand shifting to cheaper hours.
+* **Waiting-Time Reduction:** Proxy metric for customer satisfaction and reduced queueing.
 
-The full pipeline performs the following steps:
+### Ablation Studies
+To prove the necessity of the complex feature engineering, the notebook includes rigorous ablation tests. We systematically remove graph features, spatial features, and uncertainty features to benchmark how heavily the model relies on network-aware intelligence (Results confirm spatial features significantly reduce MAE).
 
-Load and clean all charging network data.
-Build a unified spatio-temporal station-time table.
-Engineer time, demand, congestion, spatial, graph, and economic features.
-Explore trends, station behavior, and network structure.
-Train forecasting models for demand prediction.
-Combine predictions into an ensemble forecast.
-Estimate uncertainty and high-risk congestion periods.
-Generate dynamic tariff recommendations.
-Simulate revenue and utilization impact.
-Evaluate forecasting and pricing performance.
-Run ablation tests to verify which advanced features matter most.
-Core agents
-Demand Prediction Agent
+---
 
-Predicts future charging demand, station occupancy, and congestion behavior using historical and engineered features.
+## Repository Structure
 
-Dynamic Tariff Agent
-
-Uses predicted demand and congestion to recommend pricing changes such as surcharges during overload and discounts during off-peak windows.
-
-Monitoring Agent
-
-Measures the effect of tariff changes on revenue, utilization, waiting-time proxy, and pricing efficiency.
-
-Coordinator Agent
-
-Combines outputs from all agents into one unified operational decision layer.
-
-The brief specifically requires a demand prediction agent, a tariff pricing agent, and a monitoring/learning agent, with a self-improving feedback loop.
-
-Feature engineering highlights
-
-This project includes a rich feature set designed for spatio-temporal and operational learning:
-
-Temporal features: hour, weekday, weekend, month, cyclic time encoding
-Lag features: previous demand and occupancy values
-Rolling features: rolling mean and rolling standard deviation
-Congestion features: congestion index, demand pressure
-Spatial features: nearest neighbor distance, mean neighbor distance
-Network features: degree centrality, betweenness centrality, closeness centrality, clustering coefficient, community ID
-Neighbor features: distance-weighted neighbor pressure
-Economic features: estimated revenue, price change percentage, pricing efficiency
-
-These engineered signals are used to improve forecasting quality and make tariff optimization context-aware.
-
-Modeling approach
-
-The forecasting layer is designed as a time-aware tabular prediction system.
-
-Baseline models
-Random Forest
-XGBoost
-LightGBM
-Advanced methods
-Ensemble forecasting
-Uncertainty estimation
-Multi-horizon forecasting
-Congestion risk prediction
-
-The goal is not only to predict the next demand value, but also to build a realistic forecasting engine that can support decision-making. The brief asks for demand forecasting using historical session features and evaluation using RMSE, MAE, and R².
-
-Dynamic tariff logic
-
-The tariff agent uses predicted demand, congestion risk, uncertainty, and network health to determine station-wise pricing actions.
-
-Typical tariff actions include:
-
-surge pricing during severe congestion,
-price increases during high demand,
-discounts during low demand,
-stable pricing in balanced regions,
-protection of critical network hubs.
-
-The brief also specifies tariff logic that raises prices when utilization is high and lowers them when utilization is low, with the overall goal of maximizing revenue while reducing congestion and wait times.
-
-Evaluation metrics
-
-The project evaluates itself using both predictive and operational metrics.
-
-Forecasting metrics
-MAE
-RMSE
-R²
-MAPE
-Tariffing metrics
-Revenue Gain %
-Charger Utilization Rate
-Off-Peak Uplift
-Pricing Efficiency Score
-Monitoring metrics
-Average Waiting-Time Reduction
-Customer Response Rate
-Network Health Score
-Price Change Impact
-
-The brief lists the same categories of evaluation, including revenue gain, charger utilization, off-peak uplift, waiting-time reduction, and pricing efficiency.
-
-Robustness and ablation studies
-
-To verify that the advanced components actually help, the project includes ablation tests such as:
-
-removing graph features,
-removing spatial features,
-removing uncertainty features,
-comparing results against the full model.
-
-This makes the work more rigorous and helps prove that the graph-aware and spatially-aware design improves performance.
-
-Results summary
-
-The current implementation produced strong results:
-
-forecasting error is low,
-ensemble forecasting is stable,
-tariffing increases simulated revenue,
-monitoring outputs are bounded and interpretable,
-graph/network features improve the overall intelligence of the system.
-
-The final notebook includes all major summaries, charts, and evaluation tables for easy review.
-
-Repository structure
-
-A clean repository layout can look like this:
-
-.
-├── README.md
+```text
+EV-Charging-Dynamic-Tariff/
+│
+├── README.md                                 # Project documentation
+├── requirements.txt                          # Python dependencies
+│
 ├── notebooks/
-│   └── EV_Charging_Dynamic_Tariff_Project.ipynb
+│   └── EV_Charging_Dynamic_Tariff_Project.ipynb  # Main end-to-end execution notebook
+│
 ├── data/
-│   ├── raw/
-│   └── processed/
-├── outputs/
+│   ├── raw/                                  # Drop raw UrbanEV/ACN-Data here
+│   └── processed/                            # Master station-time tables output here
+│
+├── outputs/                                  # Generated business logic & results
 │   ├── evaluation_summary.csv
 │   ├── final_results_table.csv
 │   ├── forecast_results.csv
 │   ├── dynamic_tariff_outputs.csv
 │   └── ablation_results.csv
-├── models/
+│
+├── models/                                   # Serialized model artifacts
 │   ├── xgboost.pkl
 │   ├── lightgbm.pkl
-│   └── random_forest.pkl
-└── figures/
-How to run
-Open the notebook in Google Colab.
-Mount Google Drive or upload the CSV files into the Colab session.
-Run the setup cells.
-Load and inspect the data.
-Build the master station-time table.
-Run feature engineering.
-Train forecasting models.
-Run tariff optimization.
-Evaluate the multi-agent system.
-Export outputs and final results.
-Deliverables
-
-The project is structured to produce the following deliverables:
-
-clean, reproducible notebook code,
-saved outputs in CSV form,
-presentation-ready charts,
-trained forecasting models,
-final evaluation tables,
-ablation study comparisons,
-and a concise presentation deck.
-
-The brief explicitly lists code/notebooks, outputs in CSV files, and a 5–7 slide presentation as deliverables, along with supporting visualizations and appendix analysis.
-
-Presentation deck contents
-
-The presentation should include:
-
-problem and motivation,
-data landscape,
-preprocessing decisions,
-demand behavior insights,
-forecasting results,
-tariff optimization logic,
-monitoring and feedback performance,
-business and policy implications,
-robustness checks.
-
-These are exactly aligned with the deliverable expectations in the project brief.
-
-Limitations
-
-This project is designed as a forecasting-and-simulation system. It does not claim full causal impact unless explicitly supported by a causal design. The brief specifically asks that causal claims be avoided unless clearly justified, and that assumptions and limitations be stated transparently.
-
-Future work
-
-Possible extensions include:
-
-reinforcement learning for tariff optimization,
-real-time deployment on live charging data,
-geospatial demand forecasting,
-fairness-aware pricing,
-vehicle-routing integration,
-policy optimization under grid constraints,
-simulation of larger urban charging networks.
+│   └── random_forest_ensemble.pkl
+│
+└── figures/                                  # Visualizations for the presentation deck
+    ├── forecast_vs_actual.png
+    ├── tariff_impact_heatmap.png
+    └── feature_importance_plot.png
